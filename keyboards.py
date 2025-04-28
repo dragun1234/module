@@ -1,5 +1,6 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from localization import messages
+from keyboards import policy_type_keyboard
 
 def language_keyboard() -> InlineKeyboardMarkup:
     """Клавиатура для выбора языка."""
