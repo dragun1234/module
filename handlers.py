@@ -63,7 +63,9 @@ async def process_language(callback_query: types.CallbackQuery, state: FSMContex
     text = messages["policy_choice"][selected_lang]
     await bot.send_message(callback_query.from_user.id, text, reply_markup=policy_type_keyboard(selected_lang))
     await state.set_state(InsuranceForm.policy_type)
-
+    await message.answer(messages["policy_choice"][lang], reply_markup=policy_type_keyboard(lang))
+    await state.set_state(Form.PolicyType)
+    
 @router.callback_query(lambda c: c.data.startswith("policy_"), InsuranceForm.policy_type)
 async def process_policy(callback_query: types.CallbackQuery, state: FSMContext):
     """Обработка выбора типа полиса."""
