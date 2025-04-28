@@ -10,14 +10,17 @@ def language_keyboard() -> InlineKeyboardMarkup:
     ])
     return keyboard
 
-def policy_type_keyboard(lang: str) -> InlineKeyboardMarkup:
-    """Клавиатура для выбора типа полиса."""
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [
-            InlineKeyboardButton(text=messages["policy_choice"][lang], callback_data="policy_visa_d"),
-            InlineKeyboardButton(text=messages["policy_choice"][lang], callback_data="policy_residence")
-        ]
-    ])
+def policy_type_keyboard(lang):
+    keyboard = InlineKeyboardMarkup(row_width=1)
+    visa_d = InlineKeyboardButton(
+        text=messages["visa_d_policy"][lang],
+        callback_data="visa_d_policy"
+    )
+    trp = InlineKeyboardButton(
+        text=messages["trp_policy"][lang],
+        callback_data="trp_policy"
+    )
+    keyboard.add(visa_d, trp)
     return keyboard
 
 def term_keyboard(lang: str) -> InlineKeyboardMarkup:
