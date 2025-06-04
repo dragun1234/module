@@ -1,6 +1,5 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from localization import messages
-from keyboards import policy_type_keyboard
 
 def language_keyboard() -> InlineKeyboardMarkup:
     """Клавиатура для выбора языка."""
@@ -11,36 +10,58 @@ def language_keyboard() -> InlineKeyboardMarkup:
     ])
     return keyboard
 
-def policy_type_keyboard(lang):
-    keyboard = InlineKeyboardMarkup(row_width=1)
-    visa_d = InlineKeyboardButton(
-        text=messages["visa_d_policy"][lang],
-        callback_data="visa_d_policy"
+# ---------- выбор типа полиса ----------
+def policy_type_keyboard(lang: str) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[[
+            InlineKeyboardButton(
+                text=messages["policy_button_visa_d"][lang],
+                callback_data="policy_visa_d"
+            ),
+            InlineKeyboardButton(
+                text=messages["policy_button_trp"][lang],
+                callback_data="policy_trp"
+            ),
+        ]]
     )
-    trp = InlineKeyboardButton(
-        text=messages["trp_policy"][lang],
-        callback_data="trp_policy"
-    )
-    keyboard.add(visa_d, trp)
-    return keyboard
+# ---------- выбор срока действия ----------
+def term_keyboard(lang: str, policy_type: str) -> InlineKeyboardMarkup:
+    """
+    policy_type:
+        visa_d   – только 90 дней
+        trp      – 1 год / 13 месяцев / 2 года
+    """
+    if policy_type == "visa_d":
+        terms = {
+            "uk": [("90 днів",   "term_90d")],
+            "en": [("90 days",   "term_90d")],
+            "ru": [("90 дней",   "term_90d")]
+        }
+    else:  # trp
+        terms = {
+            "uk": [("1 рік",      "term_1y"),
+                   ("13 місяців", "term_13m"),
+                   ("2 роки",     "term_2y")],
+            "en": [("1 year",     "term_1y"),
+                   ("13 months",  "term_13m"),
+                   ("2 years",    "term_2y")],
+            "ru": [("1 год",      "term_1y"),
+                   ("13 месяцев", "term_13m"),
+                   ("2 года",     "term_2y")]
+        }
 
-def term_keyboard(lang: str) -> InlineKeyboardMarkup:
-    """Клавиатура для выбора срока действия."""
-    terms = {
-        "🇺🇦 Українська": [("1 місяць", "1_month"), ("6 місяців", "6_months"), ("1 рік", "1_year")],
-        "🇬🇧 English": [("1 month", "1_month"), ("6 months", "6_months"), ("1 year", "1_year")],
-        "🇷🇺 Русский": [("1 месяц", "1_month"), ("6 месяцев", "6_months"), ("1 год", "1_year")]
-    }
-    buttons = [InlineKeyboardButton(text=text, callback_data=f"term_{data}") for text, data in terms[lang]]
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[buttons])
-    return keyboard
-
+    buttons = [
+        InlineKeyboardButton(text=t, callback_data=cb)
+        for t, cb in terms[lang]
+    ]
+    return InlineKeyboardMarkup(inline_keyboard=[buttons])
+  
 def citizenship_keyboard(lang: str) -> InlineKeyboardMarkup:
     """Клавиатура для выбора гражданства."""
     citizenships = {
-        "🇺🇦 Українська": [("Україна", "ukraine"), ("Інше", "other")],
-        "🇬🇧 English": [("Ukraine", "ukraine"), ("Other", "other")],
-        "🇷🇺 Русский": [("Украина", "ukraine"), ("Другое", "other")]
+        "uk": [("Україна", "ukraine"), ("Інше", "other")],
+        "en": [("Ukraine", "ukraine"), ("Other", "other")],
+        "ru": [("Украина", "ukraine"), ("Другое", "other")]
     }
     buttons = [InlineKeyboardButton(text=text, callback_data=f"citizenship_{data}") for text, data in citizenships[lang]]
     keyboard = InlineKeyboardMarkup(inline_keyboard=[buttons])
@@ -49,9 +70,9 @@ def citizenship_keyboard(lang: str) -> InlineKeyboardMarkup:
 def consent_keyboard(lang: str) -> InlineKeyboardMarkup:
     """Клавиатура для согласия."""
     consent = {
-        "🇺🇦 Українська": [("Так", "consent_yes"), ("Ні", "consent_no")],
-        "🇬🇧 English": [("Yes", "consent_yes"), ("No", "consent_no")],
-        "🇷🇺 Русский": [("Да", "consent_yes"), ("Нет", "consent_no")]
+        "uk": [("Так", "consent_yes"), ("Ні", "consent_no")],
+        "en": [("Yes", "consent_yes"), ("No", "consent_no")],
+        "ru": [("Да", "consent_yes"), ("Нет", "consent_no")]
     }
     buttons = [InlineKeyboardButton(text=text, callback_data=data) for text, data in consent[lang]]
     keyboard = InlineKeyboardMarkup(inline_keyboard=[buttons])
@@ -60,59 +81,87 @@ def consent_keyboard(lang: str) -> InlineKeyboardMarkup:
 def price_confirmation_keyboard(lang: str) -> InlineKeyboardMarkup:
     """Клавиатура для подтверждения цены."""
     confirmation = {
-        "🇺🇦 Українська": [("Так", "price_confirm_yes"), ("Ні", "price_confirm_no")],
-        "🇬🇧 English": [("Yes", "price_confirm_yes"), ("No", "price_confirm_no")],
-        "🇷🇺 Русский": [("Да", "price_confirm_yes"), ("Нет", "price_confirm_no")]
+        "uk": [("Так", "price_confirm_yes"), ("Ні", "price_confirm_no")],
+        "en": [("Yes", "price_confirm_yes"), ("No", "price_confirm_no")],
+        "ru": [("Да", "price_confirm_yes"), ("Нет", "price_confirm_no")]
     }
     buttons = [InlineKeyboardButton(text=text, callback_data=data) for text, data in confirmation[lang]]
     keyboard = InlineKeyboardMarkup(inline_keyboard=[buttons])
     return keyboard
 
 def data_confirmation_keyboard(lang: str) -> InlineKeyboardMarkup:
-    """Клавиатура для подтверждения данных."""
     confirmation = {
-        "🇺🇦 Українська": [("Так", "data_confirm_yes"), ("Ні", "data_confirm_no")],
-        "🇬🇧 English": [("Yes", "data_confirm_yes"), ("No", "data_confirm_no")],
-        "🇷🇺 Русский": [("Да", "data_confirm_yes"), ("Нет", "data_confirm_no")]
+        "uk": [("Так", "data_confirm_yes"), ("Ні", "data_confirm_no")],
+        "en": [("Yes", "data_confirm_yes"), ("No", "data_confirm_no")],
+        "ru": [("Да", "data_confirm_yes"), ("Нет", "data_confirm_no")]
     }
-    buttons = [InlineKeyboardButton(text=text, callback_data=data) for text, data in confirmation[lang]]
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[buttons])
-    return keyboard
+    buttons = [
+        InlineKeyboardButton(text=txt, callback_data=cb)
+        for txt, cb in confirmation[lang]
+    ]
+    return InlineKeyboardMarkup(inline_keyboard=[buttons])
 
 def error_fields_keyboard(fields: list, lang: str) -> InlineKeyboardMarkup:
     """Клавиатура для выбора поля для исправления."""
     field_labels = {
         "birth_date": {
-            "🇺🇦 Українська": "Дата народження",
-            "🇬🇧 English": "Birth date",
-            "🇷🇺 Русский": "Дата рождения"
+            "uk": "Дата народження",
+            "en": "Birth date",
+            "ru": "Дата рождения"
         },
         "full_name": {
-            "🇺🇦 Українська": "ПІБ",
-            "🇬🇧 English": "Full name",
-            "🇷🇺 Русский": "Полное имя"
+            "uk": "ПІБ",
+            "en": "Full name",
+            "ru": "Полное имя"
         },
         "passport": {
-            "🇺🇦 Українська": "Номер паспорта",
-            "🇬🇧 English": "Passport number",
-            "🇷🇺 Русский": "Номер паспорта"
+            "uk": "Номер паспорта",
+            "en": "Passport number",
+            "ru": "Номер паспорта"
         },
         "phone": {
-            "🇺🇦 Українська": "Телефон",
-            "🇬🇧 English": "Phone",
-            "🇷🇺 Русский": "Телефон"
+            "uk": "Телефон",
+            "en": "Phone",
+            "ru": "Телефон"
         },
         "email": {
-            "🇺🇦 Українська": "Email",
-            "🇬🇧 English": "Email",
-            "🇷🇺 Русский": "Email"
+            "uk": "Email",
+            "en": "Email",
+            "ru": "Email"
+        },
+            "gender": {
+            "uk": "Стать",
+            "en": "Gender",
+            "ru": "Пол"
+        },
+        "citizenship": {
+            "uk": "Громадянство",
+            "en": "Citizenship",
+            "ru": "Гражданство"
         },
         "address": {
-            "🇺🇦 Українська": "Адреса",
-            "🇬🇧 English": "Address",
-            "🇷🇺 Русский": "Адрес"
-        }
+            "uk": "Адреса",
+            "en": "Address",
+            "ru": "Адрес"
+            },    
     }
     buttons = [InlineKeyboardButton(text=field_labels[field][lang], callback_data=f"edit_{field}") for field in fields]
     keyboard = InlineKeyboardMarkup(inline_keyboard=[buttons])
     return keyboard
+
+def gender_keyboard(lang: str):
+    """
+    Клавиатура с двумя кнопками:
+    Жіноча / Чоловіча   (Female / Male)
+    callback_data: gender_female  |  gender_male
+    """
+    return InlineKeyboardMarkup(inline_keyboard=[[
+        InlineKeyboardButton(
+            text=messages["gender_female"][lang],
+            callback_data="gender_female"
+        ),
+        InlineKeyboardButton(
+            text=messages["gender_male"][lang],
+            callback_data="gender_male"
+        )
+    ]])
