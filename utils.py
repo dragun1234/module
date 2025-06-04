@@ -1,4 +1,5 @@
 
+import logging
 import smtplib
 from email.mime.text import MIMEText
 from typing import Dict
@@ -20,7 +21,7 @@ async def send_email(subject: str, body: str, recipient: str):
         server.sendmail(EMAIL_ADDRESS, recipient, msg.as_string())
         server.quit()
     except Exception as e:
-        print("Ошибка при отправке email:", e)
+        logging.error("Ошибка при отправке email: %s", e)
 
 
 # ------------------  отправка в канал  ------------------
@@ -28,7 +29,7 @@ async def send_channel_message(text: str):
     try:
         await bot.send_message(CHANNEL_ID, text)
     except Exception as e:
-        print("Ошибка при отправке сообщения в канал:", e)
+        logging.error("Ошибка при отправке сообщения в канал: %s", e)
 
 
 # ------------------  форматирование данных  ------------------
