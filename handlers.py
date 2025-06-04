@@ -25,6 +25,7 @@ from validators import (
     validate_email
 )
 from utils import send_email, send_channel_message
+import logging
 import re
 # ---------------- МАППИНГИ ДЛЯ ЧЕЛОВЕКОЧИТАЕМЫХ ПОДПИСЕЙ ----------------
 policy_map = {
@@ -108,7 +109,7 @@ async def process_term(callback_query: types.CallbackQuery, state: FSMContext):
     await state.update_data(term=term)
     data = await state.get_data()
     lang = data.get("lang", "ru")  # Получение языка из состояния
-    print(f"[DEBUG] Current lang in term: {lang}")  # Отладочный вывод
+    logging.debug("Current lang in term: %s", lang)
     text = messages["citizenship_prompt"][lang]
     await bot.send_message(callback_query.from_user.id, text)
     await state.set_state(InsuranceForm.citizenship)
