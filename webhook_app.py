@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, HTTPException, Header
 import os
 import logging
 from aiogram.types import Update
@@ -9,7 +9,11 @@ import handlers  # noqa: F401
 
 app = FastAPI()
 
-WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET", "CHANGE_ME")
+# Basic logging configuration for the webhook app
+logging.basicConfig(level=logging.INFO)
+
+# Accept WEBHOOK_SECRET from either WEBHOOK_SECRET or legacy NEW_SECRET env var
+WEBHOOK_SECRET = (os.getenv("WEBHOOK_SECRET") or os.getenv("NEW_SECRET") or "").strip()
 
 logger = logging.getLogger(__name__)
 
@@ -20,8 +24,17 @@ async def root():
 
 
 @app.post("/webhook/{secret}")
-async def telegram_webhook(secret: str, request: Request):
-    if secret != WEBHOOK_SECRET:
+async def telegram_webhook(
+    secret: str,
+    request: Request,
+    tg_secret: str | None = Header(default=None, alias="X-Telegram-Bot-Api-Secret-Token"),
+):
+    expected = WEBHOOK_SECRET
+    if not expected:
+        raise HTTPException(status_code=500, detail="WEBHOOK_SECRET not set")
+
+    # Accept either URL secret or Telegram header secret_token
+    if secret.strip() != expected and (tg_secret or "").strip() != expected:
         raise HTTPException(status_code=403, detail="Forbidden")
     try:
         data = await request.json()
