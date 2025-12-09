@@ -1,0 +1,7 @@
+# Файл: requirements.txt
+
+aiogram==3.18.0
+python-dotenv
+requests
+fastapi
+uvicorn[standard]

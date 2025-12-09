@@ -1,0 +1,8 @@
+запуск бота на Macbook
+
+cd /home/igor/insurance_bot_modular
+source ~/bot-env/bin/activate
+python bot.py
+
+остановка бота
+taskkill /F /IM python.exe

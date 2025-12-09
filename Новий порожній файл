@@ -1,0 +1,28 @@
+
+python bot.py
+INFO:root:Бот запущен.
+INFO:aiogram.dispatcher:Start polling
+INFO:aiogram.dispatcher:Run polling for bot @InsuranceUkr_bot id=7835445729 - 'Страховка Онлайн Бот'
+INFO:aiogram.event:Update id=361670198 is handled. Duration 313 ms by bot id=7835445729
+INFO:aiogram.event:Update id=361670199 is handled. Duration 311 ms by bot id=7835445729
+INFO:aiogram.event:Update id=361670200 is handled. Duration 77 ms by bot id=7835445729
+INFO:aiogram.event:Update id=361670201 is handled. Duration 117 ms by bot id=7835445729
+INFO:aiogram.event:Update id=361670202 is handled. Duration 109 ms by bot id=7835445729
+INFO:aiogram.event:Update id=361670203 is not handled. Duration 6 ms by bot id=7835445729
+INFO:aiogram.event:Update id=361670204 is handled. Duration 73 ms by bot id=7835445729
+INFO:aiogram.event:Update id=361670205 is handled. Duration 81 ms by bot id=7835445729
+INFO:aiogram.event:Update id=361670206 is handled. Duration 62 ms by bot id=7835445729
+INFO:aiogram.event:Update id=361670207 is handled. Duration 117 ms by bot id=7835445729
+INFO:aiogram.event:Update id=361670208 is handled. Duration 67 ms by bot id=7835445729
+INFO:aiogram.event:Update id=361670209 is handled. Duration 129 ms by bot id=7835445729
+INFO:aiogram.event:Update id=361670210 is handled. Duration 80 ms by bot id=7835445729
+INFO:aiogram.event:Update id=361670211 is handled. Duration 1454 ms by bot id=7835445729
+INFO:aiogram.event:Update id=361670212 is handled. Duration 367 ms by bot id=7835445729
+INFO:aiogram.event:Update id=361670213 is handled. Duration 89 ms by bot id=7835445729
+INFO:aiogram.event:Update id=361670214 is handled. Duration 87 ms by bot id=7835445729
+INFO:aiogram.event:Update id=361670215 is handled. Duration 144 ms by bot id=7835445729
+INFO:aiogram.event:Update id=361670216 is handled. Duration 143 ms by bot id=7835445729
+INFO:aiogram.event:Update id=361670217 is handled. Duration 73 ms by bot id=7835445729
+INFO:aiogram.event:Update id=361670218 is handled. Duration 8534 ms by bot id=7835445729
+сс
+
