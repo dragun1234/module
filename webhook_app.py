@@ -30,14 +30,17 @@ async def telegram_webhook(secret: str, request: Request):
         raise HTTPException(status_code=400, detail="Invalid JSON")
 
     try:
-        update = Update(**data)
+        # Для aiogram v3 корректно валидировать Update через Pydantic model
+        # и передать контекст с ботом, чтобы внутри Update были методы бота.
+        update = Update.model_validate(data, context={"bot": bot})
     except Exception as e:
         logger.exception("Failed to build Update object: %s", e)
         raise HTTPException(status_code=400, detail="Invalid Update payload")
 
     try:
-        # Передаём Update в диспетчер для обработки зарегистрированными хэндлерами
-        await dp.process_update(update)
+        # Передаём Update в диспетчер для обработки зарегистрированными хэндлерами.
+        # В aiogram 3.18 корректный вызов для вебхуков — feed_update(bot, update)
+        await dp.feed_update(bot, update)
     except Exception as e:
         logger.exception("Error while processing update: %s", e)
         # Не поднимаем ошибку, чтобы Telegram получил 200, но логируем
