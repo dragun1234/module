@@ -27,10 +27,28 @@ from validators import (
     validate_email
 )
 from utils import send_email, send_channel_message
+from aiogram.exceptions import TelegramNetworkError
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 import re
 import html
+import asyncio
 from logger import log_user_input, log_error, log_entry
+
+async def safe_send_message(chat_id: int, text: str, retries: int = 3) -> None:
+    """Send message with short timeout + retries to avoid hanging for minutes."""
+    for attempt in range(1, retries + 1):
+        try:
+            await bot.send_message(chat_id, text, request_timeout=10)
+            return
+        except TelegramNetworkError as e:
+            # log and retry
+            try:
+                log_error(f"Telegram send_message timeout (attempt {attempt}/{retries})", e)
+            except Exception:
+                pass
+            if attempt >= retries:
+                return
+            await asyncio.sleep(2 ** (attempt - 1))
 
 term_map = {
     "90d":       {"uk": "90 днів",      "en": "90 days",      "ru": "90 дней"},
@@ -592,6 +610,7 @@ async def process_address(message: types.Message, state: FSMContext):
 async def process_data_review(callback_query: types.CallbackQuery, state: FSMContext):
     data = await state.get_data()
     lang = data.get("lang", "ru")
+    await callback_query.answer("✅ Принято. Отправляю…")
     if callback_query.data == "data_confirm_no":
         fields = [
             "birth_date",
@@ -670,7 +689,7 @@ async def process_data_review(callback_query: types.CallbackQuery, state: FSMCon
     subject = "Новые данные для страхового полиса"
     await send_email(subject, summary, "igor@yrin.com")
     await send_channel_message(summary)
-    await bot.send_message(callback_query.from_user.id, messages["data_sent"][lang])
+    await safe_send_message(callback_query.from_user.id, messages["data_sent"][lang])
     await state.clear()
 @router.callback_query(lambda c: c.data.startswith("edit_"), InsuranceForm.data_review)
 async def process_field_correction(callback_query: types.CallbackQuery, state: FSMContext):

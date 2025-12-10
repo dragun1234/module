@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request, HTTPException, Header
 import os
 import logging
+import asyncio
 from aiogram.types import Update
 from config import dp, bot
 
@@ -26,6 +27,30 @@ logging.basicConfig(level=logging.INFO)
 WEBHOOK_SECRET = (os.getenv("WEBHOOK_SECRET") or os.getenv("NEW_SECRET") or "").strip()
 
 logger = logging.getLogger(__name__)
+
+# Queue for incoming updates to process asynchronously so webhook returns fast
+update_queue: asyncio.Queue = asyncio.Queue(maxsize=200)
+
+
+async def _worker() -> None:
+    """Background worker that processes updates from the queue using the Dispatcher."""
+    while True:
+        update = await update_queue.get()
+        try:
+            await dp.feed_update(bot, update)
+        except Exception:
+            logger.exception("Worker error while processing update")
+        finally:
+            try:
+                update_queue.task_done()
+            except Exception:
+                pass
+
+
+@app.on_event("startup")
+async def _on_startup() -> None:
+    # Start background worker(s)
+    asyncio.create_task(_worker())
 
 
 @app.get("/")
@@ -61,12 +86,17 @@ async def telegram_webhook(
         raise HTTPException(status_code=400, detail="Invalid Update payload")
 
     try:
-        # Передаём Update в диспетчер для обработки зарегистрированными хэндлерами.
-        # В aiogram 3.18 корректный вызов для вебхуков — feed_update(bot, update)
-        await dp.feed_update(bot, update)
-    except Exception as e:
-        logger.exception("Error while processing update: %s", e)
-        # Не поднимаем ошибку, чтобы Telegram получил 200, но логируем
-        return {"ok": False, "error": str(e)}
-
-    return {"ok": True}
+        # Попробуем поставить Update в очередь для фоновой обработки —
+        # это позволяет быстро вернуть 200 Telegram и не блокировать webhook.
+        update_queue.put_nowait(update)
+        return {"ok": True}
+    except asyncio.QueueFull:
+        # Если очередь переполнена (очень высокая нагрузка), логируем и
+        # выполняем обработку синхронно как запасной вариант.
+        logger.warning("Update queue is full, processing update synchronously")
+        try:
+            await dp.feed_update(bot, update)
+        except Exception:
+            logger.exception("Error while processing update synchronously")
+            # Всё равно возвращаем 200, чтобы Telegram не повторял часто.
+        return {"ok": True}
