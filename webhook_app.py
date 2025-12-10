@@ -7,6 +7,16 @@ from config import dp, bot
 # Импорт handlers чтобы гарантировать регистрацию роутера/хэндлеров
 import handlers  # noqa: F401
 
+# IMPORTANT: attach handlers router to dispatcher for webhook runtime
+# In `bot.py` you include the router for polling. When running under the
+# FastAPI webhook app we must also attach the same router to `dp`, otherwise
+# `dp` will have no handlers registered and updates will be "not handled".
+try:
+    dp.include_router(handlers.router)
+except Exception:
+    # If router already included or dp is different, ignore the error
+    pass
+
 app = FastAPI()
 
 # Basic logging configuration for the webhook app
