@@ -1,6 +1,7 @@
 # handlers.py
 from aiogram import types, Router
-from aiogram.filters import Command
+from aiogram.filters import Command, CommandStart
+from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from config import bot
@@ -61,16 +62,14 @@ class InsuranceForm(StatesGroup):
     data_review = State()        # Review of the data entered
     correction = State()         # Correction of the data
     messenger = State()          # Preferred messenger
-@router.message(Command("start"))
-async def cmd_start(message: types.Message, state: FSMContext):
-    utm_code = message.text.split(" ")[1] if len(message.text.split(" ")) > 1 else None
-    if utm_code:
-        user_id = message.from_user.id if message.from_user and message.from_user.id else "unknown"
-        await state.update_data(utm_code=utm_code)
-        # Логирование и уведомление администратора
-        await send_channel_message(f"Новый вход с UTM: {html.escape(utm_code)}, user_id: {user_id}")
-    # Приветственное сообщение на трёх языках
-    await message.answer("Будь ласка, оберіть мову / Please choose your language / Пожалуйста, выберите язык", reply_markup=language_keyboard())
+@router.message(CommandStart())
+async def cmd_start(message: Message, state: FSMContext):
+    # Clear any previous FSM state and prompt user to choose language
+    await state.clear()
+    await message.answer(
+        "Будь ласка, оберіть мову / Please choose your language / Пожалуйста, выберите язык",
+        reply_markup=language_keyboard()
+    )
     await state.set_state(InsuranceForm.language)
 @router.callback_query(lambda c: c.data.startswith("lang_"), InsuranceForm.language)
 async def process_language(callback_query: types.CallbackQuery, state: FSMContext):
